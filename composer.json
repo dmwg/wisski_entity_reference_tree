@@ -5,7 +5,7 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Dmkg\\WisskiEntityReferenceTree\\": "src/"
+            "Drupal\\wisski_entity_reference_tree\\": "src/"
         }
     },
     "authors": [

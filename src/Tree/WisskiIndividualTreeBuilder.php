@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dmkg\WisskiEntityReferenceTree\Tree;
+namespace Drupal\wisski_entity_reference_tree\Tree;
 
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\entity_reference_tree\Tree\TreeBuilderInterface;

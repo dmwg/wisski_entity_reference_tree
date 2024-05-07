@@ -1,6 +1,6 @@
 services:
   # WissKI individual builder
   entity_reference_wisski_individual_tree_builder:
-    class: Dmkg\WisskiEntityReferenceTree\Tree\WisskiIndividualTreeBuilder
+    class: Drupal\wisski_entity_reference_tree\Tree\WisskiIndividualTreeBuilder
     tags:
       - { name: entity_reference_tree_builder, priority: 1000 }
