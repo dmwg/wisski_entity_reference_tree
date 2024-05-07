@@ -4,5 +4,4 @@ description: 'Entity Reference Tree that understands Disambiguation Points'
 core_version_requirement: ^10
 package: 'WissKI'
 dependencies:
-  - drupal:views
-  - drupal:entity_reference_tree
+  - entity_reference_tree:entity_reference_tree (^2.1)

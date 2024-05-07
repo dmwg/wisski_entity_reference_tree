@@ -1,6 +1,15 @@
 services:
-  # WissKI individual builder
+  logger.channel.wisski_tree_builder:
+    parent: logger.channel_base
+    arguments: ['wisski_tree_builder']
   entity_reference_wisski_individual_tree_builder:
     class: Drupal\wisski_entity_reference_tree\Tree\WisskiIndividualTreeBuilder
+    arguments:
+      - '@logger.channel.wisski_tree_builder'
+      - '@current_user'
+      - '@entity_type.manager'
+      - '@entity_field.manager'
+      - '@language_manager'
+
     tags:
       - { name: entity_reference_tree_builder, priority: 1000 }

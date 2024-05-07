@@ -1,18 +1,42 @@
 {
     "name": "dmkg/wisski_entity_reference_tree",
     "description": "An entity reference tree builder for WissKI.",
-    "type": "drupal-module",
     "license": "MIT",
-    "autoload": {
-        "psr-4": {
-            "Drupal\\wisski_entity_reference_tree\\": "src/"
-        }
-    },
+    "type": "drupal-module",
     "authors": [
         {
             "name": "Oliver Baumann",
             "email": "oliver.baumann@uni-bayreuth.de"
         }
     ],
-    "require": {}
+    "require-dev": {
+        "ergebnis/composer-normalize": "^2.42",
+        "mglaman/phpstan-drupal": "^1.2",
+        "phpstan/extension-installer": "^1.3",
+        "phpstan/phpstan": "^1.10",
+        "phpstan/phpstan-deprecation-rules": "^1.1",
+        "thecodingmachine/phpstan-strict-rules": "^1.0",
+        "drupal/coder": "^8.3"
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://packages.drupal.org/8",
+            "exclude": [
+                "mglaman/phpstan-drupal"
+            ]
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Drupal\\wisski_entity_reference_tree\\": "src/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "ergebnis/composer-normalize": true,
+            "phpstan/extension-installer": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
 }

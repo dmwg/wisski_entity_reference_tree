@@ -4,12 +4,24 @@ declare(strict_types=1);
 
 namespace Drupal\wisski_entity_reference_tree\Tree;
 
+use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\entity_reference_tree\Tree\TreeBuilderInterface;
 use Drupal\wisski_core\Entity\WisskiBundle;
+use Drupal\wisski_core\Entity\WisskiEntity;
+use Psr\Log\LoggerInterface;
 
 /**
- * Provides a class for building a tree from general entity.
+ * Provides a class for building a tree from WissKI entities.
+ *
+ * This builder is capable of resolving parent-child-relationships formed by
+ * disambiguation points in the pathbuilder. It does so by filtering for the
+ * current bundle's custom fields first, and then iterating these to figure out
+ * if they constitute a hierarchy via the `target_id` property.
+ *
+ * This currently works, although
  *
  * @ingroup entity_reference_tree_api
  *
@@ -17,10 +29,18 @@ use Drupal\wisski_core\Entity\WisskiBundle;
  */
 class WisskiIndividualTreeBuilder implements TreeBuilderInterface {
 
+  public function __construct(
+    private LoggerInterface $logger,
+    private AccountProxyInterface $currentUser,
+    private EntityTypeManagerInterface $entityTypeManager,
+    private EntityFieldManagerInterface $entityFieldManager,
+    private LanguageManagerInterface $languageManager,
+  ) {}
+
   /**
+   * The permission name to access the entity tree.
    *
    * @var string
-   *   The permission name to access the entity tree.
    *   The entity storage load function is actually responsible for
    *   the permission checking for each individual entity.
    *   So here just use a very weak permission.
@@ -28,108 +48,97 @@ class WisskiIndividualTreeBuilder implements TreeBuilderInterface {
   private $accessPermission = 'access content';
 
   /**
-   * The Language code.
-   *
-   * @var string
-   */
-  protected $langCode;
-
-  /**
    * Load all entities from an entity bundle for the tree.
    *
    * @param string $entityType
    *   The type of the entity.
-   *
    * @param string $bundleID
    *   The bundle ID.
+   * @param string|null $langCode
+   *   The language code.
+   *   This shouldn't be part of the TreeBuilderInterface, only used in
+   *    \Drupal\entity_reference_tree\Tree\TaxonomyTreeBuilder.
+   * @param int $parent
+   *   The parent term.
+   *   This shouldn't be part of the TreeBuilderInterface, only used in
+   *    \Drupal\entity_reference_tree\Tree\TaxonomyTreeBuilder.
+   * @param int|null $max_depth
+   *   The maximum depth.
+   *   This shouldn't be part of the TreeBuilderInterface, only used in
+   *    \Drupal\entity_reference_tree\Tree\TaxonomyTreeBuilder.
    *
-   * @return array
+   * @return array<object>
    *   All entities in the entity bundle.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function loadTree(string $entityType, string $bundleID, string $langCode = NULL, int $parent = 0, int $max_depth = NULL) {
+  public function loadTree(
+    string $entityType,
+    string $bundleID,
+    string $langCode = NULL,
+    int $parent = 0,
+    int $max_depth = NULL,
+  ): array {
+    if ($bundleID === '*') {
+      $this->logger->warning(__CLASS__ . ": Can't build tree for bundle of wildcard '*', returning empty array.");
+      return [];
+    }
 
-    // dpm($langCode, __METHOD__);.
-    if ($this->hasAccess()) {
-      if ($bundleID === '*') {
-        // Load all entities regardless bundles.
-        $entities = \Drupal::entityTypeManager()->getStorage($entityType)->loadMultiple();
-        $hasBundle = FALSE;
-      }
-      else {
-        $hasBundle = TRUE;
-        $entityStorage = \Drupal::entityTypeManager()->getStorage($entityType);
-        // Build the tree node for the bundle.
-        $bundle = WisskiBundle::load($bundleID);
-        $bundleName = $bundle->label();
+    $bundle = WisskiBundle::load($bundleID);
+    $bundleName = $bundle->label();
 
-        $entityFieldManager = \Drupal::service('entity_field.manager');
-        /** @var \Drupal\Core\Field\FieldDefinition[] $fields */
-        $fields = $entityFieldManager->getFieldDefinitions('wisski_individual', $bundle->id());
+    if ($this->hasAccess($this->currentUser)) {
+      $entityStorage = $this->entityTypeManager->getStorage($entityType);
 
-        // The field name is an md5-hash of sorts; see \Drupal\wisski_pathbuilder\Entity\WisskiPathbuilderEntity::generateIdForField
-        // We store all non-base field names for this bundle, so that we can use them to index into the values-array later.
-        $customFields = [];
-        foreach ($fields as $field) {
-          if ($field->getFieldStorageDefinition()->isBaseField()) {
-            continue;
-          }
-          $customFields[] = $field->getName();
+      /** @var \Drupal\Core\Field\FieldDefinition[] $fields */
+      $fields = $this->entityFieldManager->getFieldDefinitions('wisski_individual', $bundle->id());
+
+      // The field name is an md5-hash of sorts; see
+      // \Drupal\wisski_pathbuilder\Entity\WisskiPathbuilderEntity::generateIdForField
+      // We store all non-base field names for this bundle, so that we can
+      // use them to index into the values-array later.
+      $customFields = [];
+      foreach ($fields as $field) {
+        // Skip if the current field is a base-field (`lang` etc.).
+        if ($field->getFieldStorageDefinition()->isBaseField()) {
+          continue;
         }
-
-        $tree = [
-          (object) [
-            'id' => $bundleID,
-            // Required.
-            'parent' => '#',
-            // Node text.
-            'text' => $bundleName,
-            'isBundle' => TRUE,
-          ],
-        ];
-        // Entity query properties.
-        $properties = [
-          // Bundle key field.
-          $entityStorage->getEntityType()->getKey('bundle') => $bundleID,
-        ];
-
-        // Load all entities matched the conditions.
-        $entities = $entityStorage->loadByProperties($properties);
-
+        $customFields[] = $field->getName();
       }
 
-      // By MyF:
-      // the variable $entities contains all entity ids that belong to the bundle where the entity reference tree widget points to (= the disambiguation point
-      // in the pathbuilder where "Type of form display for field = Entity reference tree widget")
-      // ******************************************************************************************************************************************************
-      // Difficult part:
-      // in order to build the hierarchy of the tree, we need the target id of the parent entity (e.g. South Africa is a country in Africa, and Johannesburg
-      // is a city in South Africa:)
-      // Africa
-      // |__South Africa
-      //    |__Johannesburg
-      // at this point: all entities Africa, South Africa and Johannesburg are stored flat in $entities, the problem is that the hierarchy information is hard
-      // to get the values array of an entity contains all field ids that are important for an entity (the own field id and the parent field id)
-      // the problem is that this array contains the field id only as long string of type f6380192737832... and we do not know how it can be determined
-      // programmatically that string of that type are fields
-      // however, the parent field id array contains a array of size 3, while all others are only of size 2 or smaller
-      // we use this fact by looking at every entry in the values array and checking if it contains an array of size 3. If yes we probably found the parent
-      // field and extract the eid which is necessary for the tree.
-      // ******************************************************************************************************************************************************
-      // PROBLEM/TODO: checking for size >2 seems to be a little bit hardcoded and we are not sure if this works in all cases!
-      // A more straight forward approach would be to somehow get all fields (entries in values having a field id) and read out those that point to any
-      // other field/eid.
-      $language = \Drupal::service('language_manager')
+      // Query for entity properties by bundle.
+      $properties = [
+        $entityStorage->getEntityType()->getKey('bundle') => $bundleID,
+      ];
+
+      // Load all entities matching the conditions.
+      $entities = $entityStorage->loadByProperties($properties);
+
+      $language = $this->languageManager
         ->getCurrentLanguage()
         ->getId();
 
+      // The bundle itself is always the root node, without a parent.
+      $tree = [
+        (object) [
+          'id' => $bundleID,
+          // Required.
+          'parent' => '#',
+          // Node text.
+          'text' => $bundleName,
+          'isBundle' => TRUE,
+        ],
+      ];
+
       foreach ($entities as $entity) {
+        assert($entity instanceof WisskiEntity);
+
         if ($entity->access('view')) {
           $trans_entity = $entity->hasTranslation($language) ? $entity->getTranslation($language) : $entity;
           $parentNodeID = 0;
-          $values = $entity->getValues(\Drupal::entityTypeManager()
-            ->getStorage($entityType));
+          $values = $entity->getValues($entityStorage);
           $values = $values[0];
-          $myid = $values['eid'][0]['value'];
 
           if (empty(array_intersect($customFields, array_keys($values)))) {
             continue;
@@ -142,24 +151,8 @@ class WisskiIndividualTreeBuilder implements TreeBuilderInterface {
             }
           }
 
-//          foreach ($values as $val) {
-//            foreach ($val as $val_field) {
-//              foreach ($val_field as $val_sub_field) {
-//                if (is_array($val_sub_field)) {
-//                  foreach ($val_sub_field as $target_id => $target_id_val) {
-//                    if (count($val_sub_field) > 2 && is_int($target_id_val)) {
-//                      if ($myid != $target_id_val) {
-//                        $parentNodeID = $target_id_val;
-//                      }
-//                    }
-//                  }
-//                }
-//              }
-//            }
-//          }
-
-          // Here the tree elements get created, which are not directly connected to the root.
           if ($parentNodeID != 0) {
+            // Add entities to the tree that are connected to a parent.
             $tree[] = (object) [
               'id' => $entity->id(),
               // Required.
@@ -168,13 +161,12 @@ class WisskiIndividualTreeBuilder implements TreeBuilderInterface {
               'text' => $trans_entity->label(),
             ];
           }
-
-          // Here the elements of the first level get created - the ones which are directly connected with the root element.
           else {
+            // Any other entities should reference the bundle itself as parent.
             $tree[] = (object) [
               'id' => $entity->id(),
               // Required.
-              'parent' => $hasBundle ? $entity->bundle() : '#',
+              'parent' => $entity->bundle(),
               // Node text.
               'text' => $trans_entity->label(),
             ];
@@ -184,24 +176,29 @@ class WisskiIndividualTreeBuilder implements TreeBuilderInterface {
 
       return $tree;
     }
-    // The user is not allowed to access taxonomy overviews.
-    return NULL;
+
+    $this->logger->warning('User @user does not have permission "@permission" to access the WissKI bundle @bundle (@bundleId)', [
+      'user' => $this->currentUser->getAccountName(),
+      'permission' => $this->accessPermission,
+      'bundle' => $bundleName,
+      'bundleId' => $bundleID,
+    ]);
+
+    return [];
   }
 
   /**
    * Create a tree node.
    *
-   * @param $entity
+   * @param object $entity
    *   The entity for the tree node.
+   * @param array<string> $selected
+   *   An array for all selected nodes.
    *
-   * @param array $selected
-   *   A anrray for all selected nodes.
-   *
-   * @return array
+   * @return array{id: string, parent: string, text: string, state: array{selected: bool}}
    *   The tree node for the entity.
    */
-  public function createTreeNode($entity, array $selected = []) {
-
+  public function createTreeNode($entity, array $selected = []): array {
     $node = [
       // Required.
       'id' => $entity->id,
@@ -229,7 +226,7 @@ class WisskiIndividualTreeBuilder implements TreeBuilderInterface {
   /**
    * Get the ID of a tree node.
    *
-   * @param $entity
+   * @param object $entity
    *   The entity for the tree node.
    *
    * @return string|int|null
@@ -249,12 +246,7 @@ class WisskiIndividualTreeBuilder implements TreeBuilderInterface {
    *   If the user has the access to the tree return TRUE,
    *   otherwise return FALSE.
    */
-  private function hasAccess(AccountProxyInterface $user = NULL) {
-    // Check current user as default.
-    if (empty($user)) {
-      $user = \Drupal::currentUser();
-    }
-
+  private function hasAccess(AccountProxyInterface $user): bool {
     return $user->hasPermission($this->accessPermission);
   }
 
