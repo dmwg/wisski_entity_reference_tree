@@ -1,0 +1,7 @@
+name: 'WissKI entity reference tree'
+type: module
+description: 'Entity Reference Tree that understands Disambiguation Points'
+core_version_requirement: ^10
+package: 'WissKI'
+dependencies:
+  - drupal:views
