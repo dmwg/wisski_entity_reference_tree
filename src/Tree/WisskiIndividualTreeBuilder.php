@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\wisski_entity_reference_tree\Tree;
 
+use Drupal\Component\Datetime\TimeInterface;
+use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
@@ -29,12 +31,18 @@ use Psr\Log\LoggerInterface;
  */
 class WisskiIndividualTreeBuilder implements TreeBuilderInterface {
 
+  private const CACHE_PREFIX = "wisski_individual_tree_";
+
+  private const CACHE_EXPIRE = 30 * 24 * 60 * 60;
+
   public function __construct(
     private LoggerInterface $logger,
     private AccountProxyInterface $currentUser,
     private EntityTypeManagerInterface $entityTypeManager,
     private EntityFieldManagerInterface $entityFieldManager,
     private LanguageManagerInterface $languageManager,
+    private CacheBackendInterface $cacheBackend,
+    private TimeInterface $time,
   ) {}
 
   /**
@@ -85,9 +93,28 @@ class WisskiIndividualTreeBuilder implements TreeBuilderInterface {
       return [];
     }
 
+    $cacheId = self::CACHE_PREFIX . $bundleID;
+    $cacheTags = [];
+
     $bundle = WisskiBundle::load($bundleID);
     $bundleName = $bundle->label();
 
+    $cacheTags = [...$cacheTags, ...$bundle->getCacheTags()];
+
+    $cachedResult = $this->cacheBackend->get($cacheId);
+    if ($cachedResult) {
+      $this->logger->info(
+        "Found cached result for {bundle} of length {len}, expires on {expires}",
+        [
+          'bundle' => $bundleName,
+          'len' => count($cachedResult->data),
+          'expires' => date('d M Y H:i:s', (int) $cachedResult->expire),
+        ]
+      );
+      return $cachedResult->data;
+    }
+
+    $this->logger->info("No cache entry found for {cacheId}", ['cacheId' => $cacheId]);
     if ($this->hasAccess($this->currentUser)) {
       $entityStorage = $this->entityTypeManager->getStorage($entityType);
 
@@ -133,6 +160,7 @@ class WisskiIndividualTreeBuilder implements TreeBuilderInterface {
 
       foreach ($entities as $entity) {
         assert($entity instanceof WisskiEntity);
+        $cacheTags = [...$cacheTags, ...$entity->getCacheTags()];
 
         if ($entity->access('view')) {
           $trans_entity = $entity->hasTranslation($language) ? $entity->getTranslation($language) : $entity;
@@ -174,10 +202,17 @@ class WisskiIndividualTreeBuilder implements TreeBuilderInterface {
         }
       }
 
+      $expires = $this->time->getRequestTime() + self::CACHE_EXPIRE;
+      $this->logger->info("Caching result with tags {tags}, expires on {expires}", [
+        'tags' => json_encode($cacheTags),
+        'expires' => date('d M Y H:i:s', $expires),
+      ]);
+      $this->cacheBackend->set($cacheId, $tree, $expires, $cacheTags);
+
       return $tree;
     }
 
-    $this->logger->warning('User @user does not have permission "@permission" to access the WissKI bundle @bundle (@bundleId)', [
+    $this->logger->warning('User {user} does not have permission "{permission}" to access the WissKI bundle {bundle} ({bundleId})', [
       'user' => $this->currentUser->getAccountName(),
       'permission' => $this->accessPermission,
       'bundle' => $bundleName,
