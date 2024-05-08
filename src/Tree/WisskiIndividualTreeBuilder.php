@@ -203,8 +203,9 @@ class WisskiIndividualTreeBuilder implements TreeBuilderInterface {
       }
 
       $expires = $this->time->getRequestTime() + self::CACHE_EXPIRE;
-      $this->logger->info("Caching result with tags {tags}, expires on {expires}", [
-        'tags' => json_encode($cacheTags),
+      $this->logger->info("Caching tree for {bundle} ({bundleId}), expires on {expires}", [
+        'bundle' => $bundleName,
+        'bundleId' => $bundleID,
         'expires' => date('d M Y H:i:s', $expires),
       ]);
       $this->cacheBackend->set($cacheId, $tree, $expires, $cacheTags);
