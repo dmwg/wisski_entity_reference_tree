@@ -1,5 +1,5 @@
 ### Composer template
 composer.phar
 /vendor/
-.env
+tags
 
