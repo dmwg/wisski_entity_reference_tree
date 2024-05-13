@@ -1,7 +1,7 @@
 {
-    "name": "dmkg/wisski_entity_reference_tree",
+    "name": "dmwg/wisski_entity_reference_tree",
     "description": "An entity reference tree builder for WissKI.",
-    "license": "MIT",
+    "license": "GPL-3.0-or-later",
     "type": "drupal-module",
     "authors": [
         {
