@@ -1,5 +1,7 @@
 # WissKI entity reference tree 🌳️
 
+![CI workflow](https://github.com/dmwg/wisski_entity_reference_tree/actions/workflows/ci.yml/badge.svg?branch=main)
+
 A Drupal module extending [drupal/entity_reference_tree](https://www.drupal.org/project/entity_reference_tree) to provide a hierarchy of entities configured through disambiguation points in the pathbuilder, e.g., tags or other forms of taxonomy.
 This module depends on `drupal/entity_reference_tree` and was tested successfully with `2.1.0`.
 

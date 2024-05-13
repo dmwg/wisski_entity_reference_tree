@@ -1,0 +1,69 @@
+---
+
+name: CI
+
+on:
+  - "push"
+  - "pull_request"
+
+permissions:
+  contents: read
+
+jobs:
+  codestyle:
+    name: Code Style
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          coverage: none
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run phpcs
+        run: composer codingstyle
+
+  typecheck:
+    name: Type Checker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          coverage: none
+          tools: composer:v2
+          extensions: dom, curl, libxml, mbstring, zip, pdo, mysql, pdo_mysql, bcmath, gd, exif, iconv
+
+      - name: Setup Drupal 10
+        uses: bluehorndigital/setup-drupal@v1.1.0
+        with:
+          version: '^10'
+          path: ~/drupal
+
+      - name: Setup dependencies
+        run: |
+          cd ~/drupal
+          composer require drupal/entity_reference_tree:^2.3 drupal/wisski:^3.15
+
+      - name: Set the version alias for self
+        run: |
+          if [ "${{ github.event_name }}" == 'pull_request' ]; then
+            echo ::set-output name=VERSION_ALIAS::dev-"${{ github.sha }}"
+          else
+            echo ::set-output name=VERSION_ALIAS::dev-main
+          fi
+        id: branch_alias
+
+      - name: Require self
+        run: |
+          cd ~/drupal
+          composer require dmwg/wisski_entity_reference_tree "${{ steps.branch_alias.outputs.VERSION_ALIAS }} as 1.1.99"
+
+      - name: Run phpstan
+        run: |
+          cd ~/drupal/web/modules/contrib/wisski_entity_reference_tree
+          composer phpstan
