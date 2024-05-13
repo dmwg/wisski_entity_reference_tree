@@ -32,9 +32,17 @@ if (\Drupal::hasService('entity_reference_' . $entity_type . '_tree_builder')) {
 
 We welcome all and any contributions via Pull Requests to this repository!
 
-### Setup
+### Local development environment
 
+For local development, it is **highly recommended** to install this module into an existing Drupal codebase, e.g., under `web/modules/custom`.
+Furthermore, we recommend at least a basic WissKI installation (c.f. [`drupal/wisski`](https://www.drupal.org/project/wisski)).
+This will provide a richer code-completion for base-Drupal, as well as WissKI-specific code.
+
+**Important:** without a local Drupal installation, static analysis via `phpstan` will fail miserably, as it relies on a Drupal autoloader.
+
+The following example assumes an installation, and clones into `web/modules/custom`:
 ```shell
+$ cd <DRUPAL_ROOT>/web/modules/custom
 $ git clone https://github.com/dmwg/wisski_entity_reference_tree
 $ cd wisski_entity_reference
 $ composer install
