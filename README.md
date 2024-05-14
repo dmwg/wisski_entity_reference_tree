@@ -18,7 +18,19 @@ if (\Drupal::hasService('entity_reference_' . $entity_type . '_tree_builder')) {
 
 ![](./screenshot.png "A screenshot of the reference tree widget")
 
+## Requirements
+
+* PHP `^8.2`
+* `drupal/wisski` (tested on `3.15`)[^1]
+* `drupal/entity_reference_tree` (tested on `2.3.2`)[^1]
+
+[^1]: Older versions might work fine.
+
 ## Installation
+
+```shell
+$ composer require dmwg/wisski_entity_reference_tree
+```
 
 ## Usage
 

@@ -6,9 +6,26 @@
     "authors": [
         {
             "name": "Oliver Baumann",
-            "email": "oliver.baumann@uni-bayreuth.de"
+            "email": "oliver.baumann@uni-bayreuth.de",
+            "homepage": "https://baumanno.de",
+            "role": "Maintainer"
+        },
+        {
+            "name": "Myriel Fichtner",
+            "role": "Developer (retired)"
+        },
+        {
+            "name": "Philipp Eisenhut",
+            "role": "Developer (retired)"
         }
     ],
+    "support": {
+        "issues": "https://github.com/dmwg/wisski_entity_reference_tree/issues",
+        "source": "https://github.com/dmwg/wisski_entity_reference_tree/tree/main"
+    },
+    "require": {
+        "php": ">=8.2"
+    },
     "require-dev": {
         "drupal/coder": "^8.3",
         "ergebnis/composer-normalize": "^2.42",
@@ -37,7 +54,13 @@
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "ergebnis/composer-normalize": true,
             "phpstan/extension-installer": true
-        }
+        },
+        "optimize-autoloader": true,
+        "platform": {
+            "php": "8.2"
+        },
+        "preferred-install": "dist",
+        "sort-packages": true
     },
     "scripts": {
         "codingstyle": [
