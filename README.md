@@ -72,7 +72,7 @@ Please run `vendor/bin/phpstan` and fix any errors; don't let a failing build di
   * Refactoring & Maintenance
 * `Myriel Fichtner`
   * Concept & original version
-* `Philipp Eisenhut`
+* `Philipp Eisenhuth`
   * Concept & original version
 
 ## Project status

@@ -1,98 +1,98 @@
 {
-    "name": "dmwg/wisski_entity_reference_tree",
-    "description": "An entity reference tree builder for WissKI.",
-    "license": "GPL-3.0-or-later",
-    "type": "drupal-module",
-    "authors": [
-        {
-            "name": "Oliver Baumann",
-            "email": "oliver.baumann@uni-bayreuth.de",
-            "homepage": "https://baumanno.de",
-            "role": "Maintainer"
-        },
-        {
-            "name": "Myriel Fichtner",
-            "role": "Developer (retired)"
-        },
-        {
-            "name": "Philipp Eisenhut",
-            "role": "Developer (retired)"
-        }
-    ],
-    "support": {
-        "issues": "https://github.com/dmwg/wisski_entity_reference_tree/issues",
-        "source": "https://github.com/dmwg/wisski_entity_reference_tree/tree/main"
+  "name": "dmwg/wisski_entity_reference_tree",
+  "description": "An entity reference tree builder for WissKI.",
+  "license": "GPL-3.0-or-later",
+  "type": "drupal-module",
+  "authors": [
+    {
+      "name": "Oliver Baumann",
+      "email": "oliver.baumann@uni-bayreuth.de",
+      "homepage": "https://baumanno.de",
+      "role": "Maintainer"
     },
-    "require": {
-        "php": ">=8.2"
+    {
+      "name": "Myriel Fichtner",
+      "role": "Developer (retired)"
     },
-    "require-dev": {
-        "drupal/coder": "^8.3",
-        "ergebnis/composer-normalize": "^2.42",
-        "mglaman/phpstan-drupal": "^1.2",
-        "phpstan/extension-installer": "^1.3",
-        "phpstan/phpstan": "^1.11",
-        "phpstan/phpstan-deprecation-rules": "^1.1",
-        "thecodingmachine/phpstan-strict-rules": "^1.0"
-    },
-    "repositories": [
-        {
-            "type": "composer",
-            "url": "https://packages.drupal.org/8",
-            "exclude": [
-                "mglaman/phpstan-drupal"
-            ]
-        }
-    ],
-    "autoload": {
-        "psr-4": {
-            "Drupal\\wisski_entity_reference_tree\\": "src/"
-        }
-    },
-    "config": {
-        "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true,
-            "ergebnis/composer-normalize": true,
-            "phpstan/extension-installer": true
-        },
-        "optimize-autoloader": true,
-        "platform": {
-            "php": "8.2"
-        },
-        "preferred-install": "dist",
-        "sort-packages": true
-    },
-    "scripts": {
-        "codingstyle": [
-            "@composer install",
-            "vendor/bin/phpcs -v --colors --no-cache -ps -w --standard=Drupal src"
-        ],
-        "codingstyle-fix": [
-            "@composer install",
-            "vendor/bin/phpcbf -v -w -p --standard=Drupal src"
-        ],
-        "phpstan": [
-            "@composer install",
-            "./vendor/bin/phpstan analyze --configuration=phpstan.neon -vvv --ansi"
-        ]
-    },
-    "scripts-descriptions": {
-        "codingstyle": "Detect violations of coding style with phpcs",
-        "codingstyle-fix": "Attempt to auto-fix violations of coding style with phpcbf",
-        "phpstan": "Run phpstan on the codebase, as configured in phpstan.neon"
-    },
-    "scripts-aliases": {
-        "codingstyle": [
-            "cs",
-            "style"
-        ],
-        "codingstyle-fix": [
-            "fix",
-            "csfix",
-            "stylefix"
-        ],
-        "phpstan": [
-            "stan"
-        ]
+    {
+      "name": "Philipp Eisenhuth",
+      "role": "Developer (retired)"
     }
+  ],
+  "support": {
+    "issues": "https://github.com/dmwg/wisski_entity_reference_tree/issues",
+    "source": "https://github.com/dmwg/wisski_entity_reference_tree/tree/main"
+  },
+  "require": {
+    "php": ">=8.2"
+  },
+  "require-dev": {
+    "drupal/coder": "^8.3",
+    "ergebnis/composer-normalize": "^2.42",
+    "mglaman/phpstan-drupal": "^1.2",
+    "phpstan/extension-installer": "^1.3",
+    "phpstan/phpstan": "^1.10",
+    "phpstan/phpstan-deprecation-rules": "^1.1",
+    "thecodingmachine/phpstan-strict-rules": "^1.0"
+  },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://packages.drupal.org/8",
+      "exclude": [
+        "mglaman/phpstan-drupal"
+      ]
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Drupal\\wisski_entity_reference_tree\\": "src/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "ergebnis/composer-normalize": true,
+      "phpstan/extension-installer": true
+    },
+    "optimize-autoloader": true,
+    "platform": {
+      "php": "8.2"
+    },
+    "preferred-install": "dist",
+    "sort-packages": true
+  },
+  "scripts": {
+    "codingstyle": [
+      "@composer install",
+      "vendor/bin/phpcs -v --colors --no-cache -ps -w --standard=Drupal src"
+    ],
+    "codingstyle-fix": [
+      "@composer install",
+      "vendor/bin/phpcbf -v -w -p --standard=Drupal src"
+    ],
+    "phpstan": [
+      "@composer install",
+      "./vendor/bin/phpstan analyze --configuration=phpstan.neon -vvv --ansi"
+    ]
+  },
+  "scripts-descriptions": {
+    "codingstyle": "Detect violations of coding style with phpcs",
+    "codingstyle-fix": "Attempt to auto-fix violations of coding style with phpcbf",
+    "phpstan": "Run phpstan on the codebase, as configured in phpstan.neon"
+  },
+  "scripts-aliases": {
+    "codingstyle": [
+      "cs",
+      "style"
+    ],
+    "codingstyle-fix": [
+      "fix",
+      "csfix",
+      "stylefix"
+    ],
+    "phpstan": [
+      "stan"
+    ]
+  }
 }
