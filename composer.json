@@ -25,7 +25,7 @@
   },
   "require": {
     "php": ">=8.2",
-    "drupal/entity_reference_tree": "^2.3"
+    "drupal/entity_reference_tree": "^2.0"
   },
   "require-dev": {
     "drupal/coder": "^8.3",
