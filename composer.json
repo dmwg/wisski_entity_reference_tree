@@ -32,7 +32,7 @@
     "mglaman/phpstan-drupal": "^1.2",
     "phpstan/extension-installer": "^1.4",
     "phpstan/phpstan": "^1.11",
-    "phpstan/phpstan-deprecation-rules": "^1.1",
+    "phpstan/phpstan-deprecation-rules": "^1.2",
     "thecodingmachine/phpstan-strict-rules": "^1.0"
   },
   "repositories": [
