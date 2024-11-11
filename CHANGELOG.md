@@ -22,4 +22,4 @@ This release marks the first stable version.
 
 Initial release.
 
-[1.0.0]: https://github.com/dmwg/wisski_entity_reference_tree/compare/v1.0.0...v0.1.0
+[1.0.0]: https://github.com/dmwg/wisski_entity_reference_tree/compare/0.1.0...1.0.0
