@@ -1,7 +1,8 @@
-name: 'WissKI entity reference tree'
+name: "WissKI entity reference tree"
 type: module
-description: 'Entity Reference Tree that understands Disambiguation Points'
+description: "Entity Reference Tree that understands Disambiguation Points"
 core_version_requirement: ^10
-package: 'WissKI'
+package: "WissKI"
 dependencies:
   - entity_reference_tree:entity_reference_tree (^2.1)
+  - wisski:wisski (^3.15)

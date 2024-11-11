@@ -43,7 +43,8 @@ class WisskiIndividualTreeBuilder implements TreeBuilderInterface {
     private LanguageManagerInterface $languageManager,
     private CacheBackendInterface $cacheBackend,
     private TimeInterface $time,
-  ) {}
+  ) {
+  }
 
   /**
    * The permission name to access the entity tree.
@@ -53,7 +54,17 @@ class WisskiIndividualTreeBuilder implements TreeBuilderInterface {
    *   the permission checking for each individual entity.
    *   So here just use a very weak permission.
    */
-  private $accessPermission = 'access content';
+  private string $accessPermission = 'access content';
+
+  /**
+   * The current language.
+   *
+   * @var ?string
+   *   Depending on the user's settings, a non-default language code may be set.
+   *   This is used in the construction of the cache-key by which to retrieve
+   *   the currently built tree.
+   */
+  private ?string $langCode = NULL;
 
   /**
    * Load all entities from an entity bundle for the tree.
@@ -69,11 +80,11 @@ class WisskiIndividualTreeBuilder implements TreeBuilderInterface {
    * @param int $parent
    *   The parent term.
    *   This shouldn't be part of the TreeBuilderInterface, only used in
-   *    \Drupal\entity_reference_tree\Tree\TaxonomyTreeBuilder.
+   *   \Drupal\entity_reference_tree\Tree\TaxonomyTreeBuilder.
    * @param int|null $max_depth
    *   The maximum depth.
    *   This shouldn't be part of the TreeBuilderInterface, only used in
-   *    \Drupal\entity_reference_tree\Tree\TaxonomyTreeBuilder.
+   *   \Drupal\entity_reference_tree\Tree\TaxonomyTreeBuilder.
    *
    * @return array<object>
    *   All entities in the entity bundle.
@@ -84,9 +95,9 @@ class WisskiIndividualTreeBuilder implements TreeBuilderInterface {
   public function loadTree(
     string $entityType,
     string $bundleID,
-    string $langCode = NULL,
+    ?string $langCode = NULL,
     int $parent = 0,
-    int $max_depth = NULL,
+    ?int $max_depth = NULL,
   ): array {
     if ($bundleID === '*') {
       $this->logger->warning(__CLASS__ . ": Can't build tree for bundle of wildcard '*', returning empty array.");
@@ -96,6 +107,19 @@ class WisskiIndividualTreeBuilder implements TreeBuilderInterface {
     $cacheId = self::CACHE_PREFIX . $bundleID;
     $cacheTags = [];
 
+    // Caching needs to be language-aware, otherwise the tag-tree will
+    // always display in the same language, regardless of user-language.
+    if (empty($langCode)) {
+      $this->langCode = $this->languageManager->getCurrentLanguage()->getId();
+    }
+    else {
+      $this->langCode = $langCode;
+    }
+
+    if ($this->langCode !== NULL) {
+      $cacheId .= sprintf("_%s", $this->langCode);
+    }
+
     $bundle = WisskiBundle::load($bundleID);
     $bundleName = $bundle->label();
 
@@ -104,13 +128,13 @@ class WisskiIndividualTreeBuilder implements TreeBuilderInterface {
     $cachedResult = $this->cacheBackend->get($cacheId);
     if ($cachedResult) {
       $this->logger->info(
-        "Found cached result for {bundle} of length {len}, expires on {expires}",
-        [
-          'bundle' => $bundleName,
-          'len' => count($cachedResult->data),
-          'expires' => date('d M Y H:i:s', (int) $cachedResult->expire),
-        ]
-      );
+            "Found cached result for {bundle} of length {len}, expires on {expires}",
+            [
+              'bundle' => $bundleName,
+              'len' => count($cachedResult->data),
+              'expires' => date('d M Y H:i:s', (int) $cachedResult->expire),
+            ]
+        );
       return $cachedResult->data;
     }
 
@@ -118,8 +142,10 @@ class WisskiIndividualTreeBuilder implements TreeBuilderInterface {
     if ($this->hasAccess($this->currentUser)) {
       $entityStorage = $this->entityTypeManager->getStorage($entityType);
 
-      /** @var \Drupal\Core\Field\FieldDefinition[] $fields */
-      $fields = $this->entityFieldManager->getFieldDefinitions('wisski_individual', $bundle->id());
+      /**
+      * @var \Drupal\Core\Field\FieldDefinition[] $fields
+      */
+      $fields = $this->entityFieldManager->getFieldDefinitions('wisski_individual', (string) $bundle->id());
 
       // The field name is an md5-hash of sorts; see
       // \Drupal\wisski_pathbuilder\Entity\WisskiPathbuilderEntity::generateIdForField
@@ -142,17 +168,13 @@ class WisskiIndividualTreeBuilder implements TreeBuilderInterface {
       // Load all entities matching the conditions.
       $entities = $entityStorage->loadByProperties($properties);
 
-      $language = $this->languageManager
-        ->getCurrentLanguage()
-        ->getId();
-
       // The bundle itself is always the root node, without a parent.
       $tree = [
         (object) [
           'id' => $bundleID,
-          // Required.
+        // Required.
           'parent' => '#',
-          // Node text.
+        // Node text.
           'text' => $bundleName,
           'isBundle' => TRUE,
         ],
@@ -163,7 +185,7 @@ class WisskiIndividualTreeBuilder implements TreeBuilderInterface {
         $cacheTags = [...$cacheTags, ...$entity->getCacheTags()];
 
         if ($entity->access('view')) {
-          $trans_entity = $entity->hasTranslation($language) ? $entity->getTranslation($language) : $entity;
+          $trans_entity = $entity->hasTranslation($this->langCode) ? $entity->getTranslation($this->langCode) : $entity;
           $parentNodeID = 0;
           $values = $entity->getValues($entityStorage);
           $values = $values[0];
@@ -173,6 +195,14 @@ class WisskiIndividualTreeBuilder implements TreeBuilderInterface {
           }
 
           foreach ($customFields as $fieldName) {
+            // Check key existance to avoid warnings.
+            if (!array_key_exists($fieldName, $values)) {
+              continue;
+            }
+            if (!array_key_exists('main_property', $values[$fieldName])) {
+              continue;
+            }
+
             if ($values[$fieldName]['main_property'] === 'target_id') {
               $parentNodeID = (int) $values[$fieldName][0]['target_id'];
               break;
@@ -203,22 +233,26 @@ class WisskiIndividualTreeBuilder implements TreeBuilderInterface {
       }
 
       $expires = $this->time->getRequestTime() + self::CACHE_EXPIRE;
-      $this->logger->info("Caching tree for {bundle} ({bundleId}), expires on {expires}", [
-        'bundle' => $bundleName,
-        'bundleId' => $bundleID,
-        'expires' => date('d M Y H:i:s', $expires),
-      ]);
+      $this->logger->info(
+            "Caching tree for {bundle} ({bundleId}), expires on {expires}", [
+              'bundle' => $bundleName,
+              'bundleId' => $bundleID,
+              'expires' => date('d M Y H:i:s', $expires),
+            ]
+        );
       $this->cacheBackend->set($cacheId, $tree, $expires, $cacheTags);
 
       return $tree;
     }
 
-    $this->logger->warning('User {user} does not have permission "{permission}" to access the WissKI bundle {bundle} ({bundleId})', [
-      'user' => $this->currentUser->getAccountName(),
-      'permission' => $this->accessPermission,
-      'bundle' => $bundleName,
-      'bundleId' => $bundleID,
-    ]);
+    $this->logger->warning(
+          'User {user} does not have permission "{permission}" to access the WissKI bundle {bundle} ({bundleId})', [
+            'user' => $this->currentUser->getAccountName(),
+            'permission' => $this->accessPermission,
+            'bundle' => $bundleName,
+            'bundleId' => $bundleID,
+          ]
+      );
 
     return [];
   }
