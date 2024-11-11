@@ -1,10 +1,8 @@
 ---
-
 name: CI
 
 on:
   - "push"
-  - "pull_request"
 
 permissions:
   contents: read
@@ -19,6 +17,7 @@ jobs:
         with:
           php-version: 8.2
           coverage: none
+          extensions: dom, curl, libxml, mbstring, zip, pdo, mysql, pdo_mysql, bcmath, gd, exif, iconv
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -41,7 +40,7 @@ jobs:
       - name: Setup Drupal 10
         uses: bluehorndigital/setup-drupal@v1.1.0
         with:
-          version: '^10'
+          version: "^10"
           path: ~/drupal
 
       - name: Setup dependencies

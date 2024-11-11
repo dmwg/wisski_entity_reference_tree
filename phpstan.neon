@@ -2,3 +2,11 @@ parameters:
     level: 6
     paths:
         - src
+    fileExtensions:
+        - php
+        - module
+        - inc
+        - install
+    scanDirectories:
+        - ./vendor/drupal/wisski
+        - ./vendor/drupal/entity_reference_tree
