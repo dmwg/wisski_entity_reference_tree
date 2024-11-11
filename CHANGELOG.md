@@ -15,9 +15,11 @@ This release marks the first stable version.
 
 ### Added
 
-* 2b8db42965393cf2e5e0fdd4705d4fa4fd2751ee makes caching trees language-aware,
+* [PR #33](https://github.com/dmwg/wisski_entity_reference_tree/pull/33) makes caching trees language-aware,
   so that each language receives its own cache entry
 
 ## 0.1.0
 
 Initial release.
+
+[1.0.0]: https://github.com/dmwg/wisski_entity_reference_tree/compare/v1.0.0...v0.1.0
