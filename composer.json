@@ -3,6 +3,7 @@
   "description": "An entity reference tree builder for WissKI.",
   "license": "GPL-3.0-or-later",
   "type": "drupal-module",
+  "version": "0.1.0",
   "authors": [
     {
       "name": "Oliver Baumann",
@@ -19,15 +20,18 @@
       "role": "Developer (retired)"
     }
   ],
+  "homepage": "https://github.com/dmwg/wisski_entity_reference_tree",
   "support": {
     "issues": "https://github.com/dmwg/wisski_entity_reference_tree/issues",
-    "source": "https://github.com/dmwg/wisski_entity_reference_tree/tree/main"
+    "source": "https://github.com/dmwg/wisski_entity_reference_tree.git"
   },
   "require": {
-    "php": ">=8.2"
+    "php": ">=8.2",
+    "drupal/core": "^10"
   },
   "require-dev": {
     "drupal/coder": "^8.3",
+    "drupal/core-dev": "^10.3",
     "ergebnis/composer-normalize": "^2.44",
     "mglaman/phpstan-drupal": "^1.2",
     "phpstan/extension-installer": "^1.4",
