@@ -28,7 +28,7 @@ jobs:
   typecheck:
     strategy:
       matrix:
-        wisski_version: [3.15, 4.0]
+        wisski_version: ["3.15", "4.0"]
     name: Type Checker
     runs-on: ubuntu-latest
     steps:
@@ -63,7 +63,7 @@ jobs:
       - name: Require self
         run: |
           cd ~/drupal
-          composer require dmwg/wisski_entity_reference_tree "${{ steps.branch_alias.outputs.VERSION_ALIAS }} as 1.1.99.${{matrix.wisski_version}}"
+          composer require dmwg/wisski_entity_reference_tree "${{ steps.branch_alias.outputs.VERSION_ALIAS }} as 1.1.99" --with-all-dependencies
 
       - name: Run phpstan
         run: |
