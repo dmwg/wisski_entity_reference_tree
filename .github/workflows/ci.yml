@@ -2,7 +2,10 @@
 name: CI
 
 on:
-  - "push"
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: read
@@ -26,6 +29,9 @@ jobs:
         run: composer codingstyle
 
   typecheck:
+    strategy:
+      matrix:
+        wisski_version: ["3.15", "4.0"]
     name: Type Checker
     runs-on: ubuntu-latest
     steps:
@@ -46,7 +52,8 @@ jobs:
       - name: Setup dependencies
         run: |
           cd ~/drupal
-          composer require drupal/entity_reference_tree:^2.3 drupal/wisski:^3.15
+          composer require drupal/entity_reference_tree:^2.3
+          composer require drupal/wisski:^${{ matrix.wisski_version }} --no-update
 
       - name: Set the version alias for self
         run: |
@@ -60,7 +67,7 @@ jobs:
       - name: Require self
         run: |
           cd ~/drupal
-          composer require dmwg/wisski_entity_reference_tree "${{ steps.branch_alias.outputs.VERSION_ALIAS }} as 1.1.99"
+          composer require dmwg/wisski_entity_reference_tree "${{ steps.branch_alias.outputs.VERSION_ALIAS }} as 1.1.99" --with-all-dependencies --no-update
 
       - name: Run phpstan
         run: |
