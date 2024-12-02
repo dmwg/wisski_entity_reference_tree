@@ -53,7 +53,7 @@ jobs:
 
       - name: Set the version alias for self
         run: |
-          if [ "${{ github.event_name }}" == 'pull_request' ]; then
+          if [ "${{ github.event_name }}" == 'push' ]; then
             echo ::set-output name=VERSION_ALIAS::dev-main#"${{ github.sha }}"
           else
             echo ::set-output name=VERSION_ALIAS::dev-main
