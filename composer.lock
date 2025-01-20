@@ -2870,12 +2870,12 @@
             },
             "type": "library",
             "extra": {
+                "thanks": {
+                    "url": "https://github.com/symfony/contracts",
+                    "name": "symfony/contracts"
+                },
                 "branch-alias": {
                     "dev-main": "3.5-dev"
-                },
-                "thanks": {
-                    "name": "symfony/contracts",
-                    "url": "https://github.com/symfony/contracts"
                 }
             },
             "autoload": {
@@ -3661,8 +3661,8 @@
             "type": "library",
             "extra": {
                 "thanks": {
-                    "name": "symfony/polyfill",
-                    "url": "https://github.com/symfony/polyfill"
+                    "url": "https://github.com/symfony/polyfill",
+                    "name": "symfony/polyfill"
                 }
             },
             "autoload": {
@@ -4136,8 +4136,8 @@
             "type": "library",
             "extra": {
                 "thanks": {
-                    "name": "symfony/polyfill",
-                    "url": "https://github.com/symfony/polyfill"
+                    "url": "https://github.com/symfony/polyfill",
+                    "name": "symfony/polyfill"
                 }
             },
             "autoload": {
@@ -5369,16 +5369,16 @@
         },
         {
             "name": "drupal/coder",
-            "version": "8.3.26",
+            "version": "8.3.28",
             "source": {
                 "type": "git",
                 "url": "https://github.com/pfrenssen/coder.git",
-                "reference": "fd98546ce3373aa7767240901eda47963ce64c82"
+                "reference": "d18eeb133f7da766f0341734aa983d05f2b317fd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pfrenssen/coder/zipball/fd98546ce3373aa7767240901eda47963ce64c82",
-                "reference": "fd98546ce3373aa7767240901eda47963ce64c82",
+                "url": "https://api.github.com/repos/pfrenssen/coder/zipball/d18eeb133f7da766f0341734aa983d05f2b317fd",
+                "reference": "d18eeb133f7da766f0341734aa983d05f2b317fd",
                 "shasum": ""
             },
             "require": {
@@ -5387,7 +5387,7 @@
                 "php": ">=7.2",
                 "sirbrillig/phpcs-variable-analysis": "^2.11.7",
                 "slevomat/coding-standard": "^8.11",
-                "squizlabs/php_codesniffer": "^3.9.1",
+                "squizlabs/php_codesniffer": "^3.11.2",
                 "symfony/yaml": ">=3.4.0"
             },
             "require-dev": {
@@ -5416,7 +5416,7 @@
                 "issues": "https://www.drupal.org/project/issues/coder",
                 "source": "https://www.drupal.org/project/coder"
             },
-            "time": "2024-11-28T23:14:29+00:00"
+            "time": "2025-01-18T17:05:53+00:00"
         },
         {
             "name": "ergebnis/composer-normalize",
@@ -6262,16 +6262,16 @@
         },
         {
             "name": "sirbrillig/phpcs-variable-analysis",
-            "version": "v2.11.20",
+            "version": "v2.11.22",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sirbrillig/phpcs-variable-analysis.git",
-                "reference": "c3780f281e2e82ab1f2de7fa85a16532b1e44592"
+                "reference": "ffb6f16c6033ec61ed84446b479a31d6529f0eb7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sirbrillig/phpcs-variable-analysis/zipball/c3780f281e2e82ab1f2de7fa85a16532b1e44592",
-                "reference": "c3780f281e2e82ab1f2de7fa85a16532b1e44592",
+                "url": "https://api.github.com/repos/sirbrillig/phpcs-variable-analysis/zipball/ffb6f16c6033ec61ed84446b479a31d6529f0eb7",
+                "reference": "ffb6f16c6033ec61ed84446b479a31d6529f0eb7",
                 "shasum": ""
             },
             "require": {
@@ -6283,7 +6283,6 @@
                 "phpcsstandards/phpcsdevcs": "^1.1",
                 "phpstan/phpstan": "^1.7",
                 "phpunit/phpunit": "^4.8.36 || ^5.7.21 || ^6.5 || ^7.0 || ^8.0 || ^9.0 || ^10.5.32 || ^11.3.3",
-                "sirbrillig/phpcs-import-detection": "^1.1",
                 "vimeo/psalm": "^0.2 || ^0.3 || ^1.1 || ^4.24 || ^5.0"
             },
             "type": "phpcodesniffer-standard",
@@ -6316,7 +6315,7 @@
                 "source": "https://github.com/sirbrillig/phpcs-variable-analysis",
                 "wiki": "https://github.com/sirbrillig/phpcs-variable-analysis/wiki"
             },
-            "time": "2024-12-01T22:31:44+00:00"
+            "time": "2025-01-06T17:54:24+00:00"
         },
         {
             "name": "slevomat/coding-standard",
@@ -6385,16 +6384,16 @@
         },
         {
             "name": "squizlabs/php_codesniffer",
-            "version": "3.11.1",
+            "version": "3.11.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer.git",
-                "reference": "19473c30efe4f7b3cd42522d0b2e6e7f243c6f87"
+                "reference": "1368f4a58c3c52114b86b1abe8f4098869cb0079"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/19473c30efe4f7b3cd42522d0b2e6e7f243c6f87",
-                "reference": "19473c30efe4f7b3cd42522d0b2e6e7f243c6f87",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/1368f4a58c3c52114b86b1abe8f4098869cb0079",
+                "reference": "1368f4a58c3c52114b86b1abe8f4098869cb0079",
                 "shasum": ""
             },
             "require": {
@@ -6461,7 +6460,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2024-11-16T12:02:36+00:00"
+            "time": "2024-12-11T16:04:26+00:00"
         },
         {
             "name": "thecodingmachine/phpstan-strict-rules",
@@ -6577,5 +6576,5 @@
     "platform-overrides": {
         "php": "8.2"
     },
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.3.0"
 }
